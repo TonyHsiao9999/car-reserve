@@ -91,27 +91,68 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
     // 等待預約頁面載入
     console.log("⏳ 等待預約頁面載入...");
-    await sleep(5000);
+    await sleep(10000);
+
+    // 檢查是否在預約頁面
+    console.log("🔍 檢查預約頁面...");
+    const currentUrl = page.url();
+    console.log("當前頁面 URL:", currentUrl);
+
+    if (!currentUrl.includes('Reservation')) {
+      console.log("⚠️ 不在預約頁面，嘗試重新導航...");
+      await page.goto('https://www.ntpc.ltc-car.org/Reservation', {
+        waitUntil: 'networkidle2',
+        timeout: 30000
+      });
+      await sleep(5000);
+    }
 
     // 填寫預約資訊
     console.log("📝 填寫預約資訊...");
-    await page.waitForSelector('select#pickUp_location', { visible: true });
+    
+    // 等待並檢查表單元素
+    console.log("⏳ 等待表單元素載入...");
+    await page.waitForSelector('select#pickUp_location', { 
+      timeout: 30000,
+      visible: true 
+    }).catch(async (error) => {
+      console.log("⚠️ 等待表單元素超時，嘗試重新整理頁面...");
+      await page.reload({ waitUntil: 'networkidle2' });
+      await sleep(5000);
+      return page.waitForSelector('select#pickUp_location', { 
+        timeout: 30000,
+        visible: true 
+      });
+    });
+
     await page.select('select#pickUp_location', '1');
     
-    await page.waitForSelector('input#pickUp_address_text', { visible: true });
+    await page.waitForSelector('input#pickUp_address_text', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.fill('input#pickUp_address_text', '亞東紀念醫院');
     await page.keyboard.press('ArrowDown');
     await sleep(2000);
     
-    const locationLabel = await page.waitForSelector('.location:nth-child(1) > label', { visible: true });
+    const locationLabel = await page.waitForSelector('.location:nth-child(1) > label', { 
+      timeout: 30000,
+      visible: true 
+    });
     if (locationLabel) {
       await locationLabel.click();
     }
 
-    await page.waitForSelector('select#getOff_location', { visible: true });
+    await page.waitForSelector('select#getOff_location', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.select('select#getOff_location', '0');
     
-    await page.waitForSelector('select#getOff_address', { visible: true });
+    await page.waitForSelector('select#getOff_address', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.select('select#getOff_address', '新北市板橋區中正路1巷18號');
 
     const options = await page.$$('select#appointment_date option');
@@ -120,31 +161,58 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       await page.select('select#appointment_date', value);
     }
 
-    await page.waitForSelector('select#appointment_hour', { visible: true });
+    await page.waitForSelector('select#appointment_hour', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.select('select#appointment_hour', '16');
     
-    await page.waitForSelector('select#appointment_minutes', { visible: true });
+    await page.waitForSelector('select#appointment_minutes', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.select('select#appointment_minutes', '40');
 
-    await page.waitForSelector('.form_item:nth-child(6) .cus_checkbox_type1:nth-child(2) > div', { visible: true });
+    await page.waitForSelector('.form_item:nth-child(6) .cus_checkbox_type1:nth-child(2) > div', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.click('.form_item:nth-child(6) .cus_checkbox_type1:nth-child(2) > div');
     
-    await page.waitForSelector('#accompany_label', { visible: true });
+    await page.waitForSelector('#accompany_label', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.select('#accompany_label', '1');
     
-    await page.waitForSelector('.form_item:nth-child(10) .cus_checkbox_type1:nth-child(2) > div', { visible: true });
+    await page.waitForSelector('.form_item:nth-child(10) .cus_checkbox_type1:nth-child(2) > div', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.click('.form_item:nth-child(10) .cus_checkbox_type1:nth-child(2) > div');
     
-    await page.waitForSelector('.form_item:nth-child(11) .cus_checkbox_type1:nth-child(1) > div', { visible: true });
+    await page.waitForSelector('.form_item:nth-child(11) .cus_checkbox_type1:nth-child(1) > div', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.click('.form_item:nth-child(11) .cus_checkbox_type1:nth-child(1) > div');
     
-    await page.waitForSelector('.form_item:nth-child(12) .cus_checkbox_type1:nth-child(2) > div', { visible: true });
+    await page.waitForSelector('.form_item:nth-child(12) .cus_checkbox_type1:nth-child(2) > div', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.click('.form_item:nth-child(12) .cus_checkbox_type1:nth-child(2) > div');
 
-    await page.waitForSelector('.page_bottom > .button', { visible: true });
+    await page.waitForSelector('.page_bottom > .button', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.click('.page_bottom > .button');
     
-    await page.waitForSelector('button.button-fill:nth-child(2)', { visible: true });
+    await page.waitForSelector('button.button-fill:nth-child(2)', { 
+      timeout: 30000,
+      visible: true 
+    });
     await page.click('button.button-fill:nth-child(2)');
 
     console.log('✅ 預約完成！');
