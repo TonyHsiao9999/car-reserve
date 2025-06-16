@@ -1,34 +1,30 @@
 require('dotenv').config();
 const puppeteer = require('puppeteer-core');
-const fs = require('fs');
 
 // 建立 Promise 版本的 setTimeout
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// 除錯函數：截圖並儲存 HTML
+// 除錯函數：將截圖轉為 Base64 並輸出到日誌
 async function debugPage(page, step) {
   try {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const debugDir = 'debug';
     
-    // 建立除錯目錄
-    if (!fs.existsSync(debugDir)) {
-      fs.mkdirSync(debugDir);
-    }
-
-    // 儲存截圖
-    await page.screenshot({ 
-      path: `${debugDir}/screenshot-${step}-${timestamp}.png`,
+    // 儲存截圖為 Base64
+    const screenshot = await page.screenshot({ 
+      encoding: 'base64',
       fullPage: true 
     });
+    console.log(`📸 截圖 ${step} (Base64):`);
+    console.log(screenshot);
 
-    // 儲存 HTML
+    // 輸出 HTML 內容
     const html = await page.content();
-    fs.writeFileSync(`${debugDir}/html-${step}-${timestamp}.html`, html);
+    console.log(`📄 HTML ${step}:`);
+    console.log(html);
 
-    console.log(`📸 已儲存除錯資訊：${step}`);
+    console.log(`✅ 已輸出除錯資訊：${step}`);
   } catch (error) {
-    console.error('❌ 儲存除錯資訊失敗：', error);
+    console.error('❌ 輸出除錯資訊失敗：', error);
   }
 }
 
@@ -260,11 +256,11 @@ async function debugPage(page, step) {
     console.error('❌ 發生錯誤：', error.message);
     console.error('錯誤堆疊：', error.stack);
     
-    // 在錯誤發生時截圖
+    // 在錯誤發生時輸出除錯資訊
     try {
       await debugPage(page, 'error');
     } catch (screenshotError) {
-      console.error('無法儲存錯誤截圖：', screenshotError);
+      console.error('無法輸出錯誤除錯資訊：', screenshotError);
     }
     
     process.exit(1);
