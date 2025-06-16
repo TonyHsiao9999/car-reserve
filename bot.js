@@ -71,19 +71,47 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     });
     await page.click('span.dialog-button');
 
+    // 等待頁面重新載入
+    console.log("⏳ 等待頁面重新載入...");
+    await sleep(5000);
+
     // 點擊預約連結
     console.log("📅 準備預約...");
-    await page.click('a.link:nth-child(2)');
+    const reservationLink = await page.waitForSelector('a.link, a[href*="Reservation"], .reservation-link', {
+      timeout: 10000,
+      visible: true
+    });
+
+    if (reservationLink) {
+      console.log("✅ 找到預約連結，準備點擊...");
+      await reservationLink.click();
+    } else {
+      throw new Error("找不到預約連結");
+    }
+
+    // 等待預約頁面載入
+    console.log("⏳ 等待預約頁面載入...");
+    await sleep(5000);
 
     // 填寫預約資訊
     console.log("📝 填寫預約資訊...");
+    await page.waitForSelector('select#pickUp_location', { visible: true });
     await page.select('select#pickUp_location', '1');
+    
+    await page.waitForSelector('input#pickUp_address_text', { visible: true });
     await page.fill('input#pickUp_address_text', '亞東紀念醫院');
     await page.keyboard.press('ArrowDown');
-    await sleep(1000);
-    await page.click('.location:nth-child(1) > label');
+    await sleep(2000);
+    
+    const locationLabel = await page.waitForSelector('.location:nth-child(1) > label', { visible: true });
+    if (locationLabel) {
+      await locationLabel.click();
+    }
 
+    await page.waitForSelector('select#getOff_location', { visible: true });
     await page.select('select#getOff_location', '0');
+    
+    await page.waitForSelector('select#getOff_address', { visible: true });
     await page.select('select#getOff_address', '新北市板橋區中正路1巷18號');
 
     const options = await page.$$('select#appointment_date option');
@@ -92,16 +120,31 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
       await page.select('select#appointment_date', value);
     }
 
+    await page.waitForSelector('select#appointment_hour', { visible: true });
     await page.select('select#appointment_hour', '16');
+    
+    await page.waitForSelector('select#appointment_minutes', { visible: true });
     await page.select('select#appointment_minutes', '40');
 
+    await page.waitForSelector('.form_item:nth-child(6) .cus_checkbox_type1:nth-child(2) > div', { visible: true });
     await page.click('.form_item:nth-child(6) .cus_checkbox_type1:nth-child(2) > div');
+    
+    await page.waitForSelector('#accompany_label', { visible: true });
     await page.select('#accompany_label', '1');
+    
+    await page.waitForSelector('.form_item:nth-child(10) .cus_checkbox_type1:nth-child(2) > div', { visible: true });
     await page.click('.form_item:nth-child(10) .cus_checkbox_type1:nth-child(2) > div');
+    
+    await page.waitForSelector('.form_item:nth-child(11) .cus_checkbox_type1:nth-child(1) > div', { visible: true });
     await page.click('.form_item:nth-child(11) .cus_checkbox_type1:nth-child(1) > div');
+    
+    await page.waitForSelector('.form_item:nth-child(12) .cus_checkbox_type1:nth-child(2) > div', { visible: true });
     await page.click('.form_item:nth-child(12) .cus_checkbox_type1:nth-child(2) > div');
 
+    await page.waitForSelector('.page_bottom > .button', { visible: true });
     await page.click('.page_bottom > .button');
+    
+    await page.waitForSelector('button.button-fill:nth-child(2)', { visible: true });
     await page.click('button.button-fill:nth-child(2)');
 
     console.log('✅ 預約完成！');
