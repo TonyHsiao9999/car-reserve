@@ -26,8 +26,8 @@
 2. 設定環境變數：
    建立 `.env` 檔案，內容如下：
    ```
-   ID_NUMBER=您的身分證號碼
-   PASSWORD=您的密碼
+   LTC_ID_NUMBER=您的身分證號碼
+   LTC_PASSWORD=您的密碼
    ```
 
 3. 執行程式：
@@ -40,8 +40,8 @@
 1. 在 Zeabur 上建立新專案
 2. 選擇 Docker 部署方式
 3. 設定環境變數：
-   - `ID_NUMBER`
-   - `PASSWORD`
+   - `LTC_ID_NUMBER`
+   - `LTC_PASSWORD`
 4. 設定 Cron Job：
    - Schedule: `0 0 * * 1,4`（每週一和週四執行）
    - Command: `npm start`

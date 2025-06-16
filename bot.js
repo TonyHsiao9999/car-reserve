@@ -28,8 +28,8 @@ const puppeteer = require('puppeteer-core');
 
     await page.click('a[href="/Home/Login"]');
     await page.waitForSelector('input#IDNumber', { timeout: 10000 });
-    await page.type('input#IDNumber', process.env.ID_NUMBER);
-    await page.type('input#password', process.env.PASSWORD);
+    await page.type('input#IDNumber', process.env.LTC_ID_NUMBER);
+    await page.type('input#password', process.env.LTC_PASSWORD);
 
     await page.click('a.button-fill:nth-child(2)');
     await page.waitForSelector('span.dialog-button', { timeout: 10000 });
