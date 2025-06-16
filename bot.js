@@ -26,17 +26,53 @@ const puppeteer = require('puppeteer-core');
       timeout: 30000 
     });
 
-    await page.click('a[href="/Home/Login"]');
-    await page.waitForSelector('input#IDNumber', { timeout: 10000 });
+    // 等待頁面完全載入
+    await page.waitForTimeout(5000);
+
+    // 檢查並點擊登入按鈕
+    console.log("🔍 尋找登入按鈕...");
+    const loginButton = await page.waitForSelector('a[href="/Home/Login"], .login-button, .button-fill', { 
+      timeout: 10000,
+      visible: true 
+    });
+    
+    if (loginButton) {
+      console.log("✅ 找到登入按鈕，準備點擊...");
+      await loginButton.click();
+    } else {
+      throw new Error("找不到登入按鈕");
+    }
+
+    // 等待登入表單載入
+    console.log("⏳ 等待登入表單載入...");
+    await page.waitForSelector('input#IDNumber', { 
+      timeout: 10000,
+      visible: true 
+    });
+
+    // 輸入登入資訊
+    console.log("📝 輸入登入資訊...");
     await page.type('input#IDNumber', process.env.LTC_ID_NUMBER);
     await page.type('input#password', process.env.LTC_PASSWORD);
 
+    // 點擊登入
+    console.log("🔑 點擊登入...");
     await page.click('a.button-fill:nth-child(2)');
-    await page.waitForSelector('span.dialog-button', { timeout: 10000 });
+    
+    // 等待登入成功
+    console.log("⏳ 等待登入成功...");
+    await page.waitForSelector('span.dialog-button', { 
+      timeout: 10000,
+      visible: true 
+    });
     await page.click('span.dialog-button');
 
+    // 點擊預約連結
+    console.log("📅 準備預約...");
     await page.click('a.link:nth-child(2)');
 
+    // 填寫預約資訊
+    console.log("📝 填寫預約資訊...");
     await page.select('select#pickUp_location', '1');
     await page.fill('input#pickUp_address_text', '亞東紀念醫院');
     await page.keyboard.press('ArrowDown');
@@ -68,6 +104,15 @@ const puppeteer = require('puppeteer-core');
   } catch (error) {
     console.error('❌ 發生錯誤：', error.message);
     console.error('錯誤堆疊：', error.stack);
+    
+    // 在錯誤發生時截圖
+    try {
+      await page.screenshot({ path: 'error-screenshot.png' });
+      console.log('📸 已儲存錯誤截圖');
+    } catch (screenshotError) {
+      console.error('無法儲存錯誤截圖：', screenshotError);
+    }
+    
     process.exit(1);
   } finally {
     await browser.close();
