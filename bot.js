@@ -1,6 +1,9 @@
 require('dotenv').config();
 const puppeteer = require('puppeteer-core');
 
+// 建立 Promise 版本的 setTimeout
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 (async () => {
   const browser = await puppeteer.launch({
     headless: 'new',
@@ -27,7 +30,8 @@ const puppeteer = require('puppeteer-core');
     });
 
     // 等待頁面完全載入
-    await page.waitForTimeout(5000);
+    console.log("⏳ 等待頁面載入...");
+    await sleep(5000);
 
     // 檢查並點擊登入按鈕
     console.log("🔍 尋找登入按鈕...");
@@ -76,7 +80,7 @@ const puppeteer = require('puppeteer-core');
     await page.select('select#pickUp_location', '1');
     await page.fill('input#pickUp_address_text', '亞東紀念醫院');
     await page.keyboard.press('ArrowDown');
-    await page.waitForTimeout(1000);
+    await sleep(1000);
     await page.click('.location:nth-child(1) > label');
 
     await page.select('select#getOff_location', '0');
